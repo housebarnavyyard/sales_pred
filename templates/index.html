@@ -28,18 +28,15 @@
     <script>
         // Get the forecast data from Flask, correctly converting it into JSON format
         const forecastData = JSON.parse('{{ forecast_data | tojson | safe }}');
-        
-        console.log("Forecast Data: ", forecastData); // Log the forecast data to debug
 
-        // Check if the forecast data is empty
-        if (!forecastData || forecastData.length === 0) {
-            console.error("No forecast data available.");
-        }
+        // Debug: Log the forecast data in the console to inspect it
+        console.log("Forecast Data: ", forecastData);
 
-        // Ensure that dates are in ISO 8601 format and log the parsed data
+        // Prepare data for the chart
         const labels = forecastData.map(data => {
-            const date = new Date(data.Date).toISOString().split('T')[0]; // Convert to 'YYYY-MM-DD'
-            console.log("Parsed Date: ", date);
+            // Convert to 'YYYY-MM-DD' format and log the parsed date
+            const date = new Date(data.Date).toISOString().split('T')[0];
+            console.log("Parsed Date: ", date);  // Debug
             return date;
         });
 
@@ -81,8 +78,7 @@
         forecastData.forEach(data => {
             const row = document.createElement('tr');
             const dateCell = document.createElement('td');
-            const formattedDate = new Date(data.Date).toISOString().split('T')[0]; // Ensure correct date format
-            dateCell.textContent = formattedDate;
+            dateCell.textContent = new Date(data.Date).toISOString().split('T')[0]; // Format the date
             const salesCell = document.createElement('td');
             salesCell.textContent = data.TimeGPT;
             row.appendChild(dateCell);
