@@ -1,17 +1,30 @@
 from flask import Flask, render_template
 import pandas as pd
 from nixtla import NixtlaClient
+from google.cloud import storage
+import io
 
 app = Flask(__name__)
 
 # Initialize Nixtla Client with your API key
 nixtla_client = NixtlaClient(api_key='nixtla-tok-u8xxrv1Z85ERiGue41KoOsnhyQ7zHjcZi9fEV23cYLixX8iToWIUnYiXLcxcEsFX0kfazAyOKaijLQ78')
 
+def download_csv_from_gcs(bucket_name, file_name):
+    """Download a CSV file from Google Cloud Storage."""
+    client = storage.Client()
+    bucket = client.get_bucket(bucket_name)
+    blob = bucket.blob(file_name)
+    data = blob.download_as_bytes()
+    return io.BytesIO(data)
+
 @app.route('/')
 def index():
-    # Read the sales data
-    file_path = '/Users/vishwanathmuthuraman/Desktop/HB App/sales prediction - 1.csv'  # Adjust path
-    df = pd.read_csv(file_path)
+    # Read the sales data from Google Cloud Storage
+    bucket_name = 'square_bucket'  # Replace with your GCS bucket name
+    file_name = 'sales prediction - 1.csv'  # Replace with your GCS file name
+    data = download_csv_from_gcs(bucket_name, file_name)
+
+    df = pd.read_csv(data)
 
     # Convert Date column to datetime type
     df['Date'] = pd.to_datetime(df['Date'])
