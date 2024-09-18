@@ -15,13 +15,19 @@ def download_csv_from_gcs(bucket_name, file_name):
     bucket = client.get_bucket(bucket_name)
     blob = bucket.blob(file_name)
     data = blob.download_as_bytes()
-    return io.BytesIO(data)
+    return io.BytesIO(data)  # Convert bytes into a stream to be read by pandas
 
 @app.route('/')
 def index():
-    # Read the sales data
-    file_path = '/path/to/your/csv/file.csv'  # Adjust path
-    df = pd.read_csv(file_path)
+    # Read the sales data from Google Cloud Storage
+    bucket_name = 'square_bucket'  # Replace with your GCS bucket name
+    file_name = 'sales prediction - 1.csv'  # Replace with your GCS file name
+
+    # Download the CSV file from GCS
+    csv_data = download_csv_from_gcs(bucket_name, file_name)
+
+    # Read the CSV data into a pandas DataFrame
+    df = pd.read_csv(csv_data)
 
     # Preprocessing data
     df['Date'] = pd.to_datetime(df['Date'])
