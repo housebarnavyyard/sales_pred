@@ -26,13 +26,28 @@
     </table>
 
     <script>
-        // Get the forecast data from Flask
-        const forecastData = {{ forecast_data | tojson }};
+        // Get the forecast data from Flask, correctly converting it into JSON format
+        const forecastData = JSON.parse('{{ forecast_data | tojson | safe }}');
         
-        // Prepare data for the chart
-        const labels = forecastData.map(data => data.Date);
+        console.log("Forecast Data: ", forecastData); // Log the forecast data to debug
+
+        // Check if the forecast data is empty
+        if (!forecastData || forecastData.length === 0) {
+            console.error("No forecast data available.");
+        }
+
+        // Ensure that dates are in ISO 8601 format and log the parsed data
+        const labels = forecastData.map(data => {
+            const date = new Date(data.Date).toISOString().split('T')[0]; // Convert to 'YYYY-MM-DD'
+            console.log("Parsed Date: ", date);
+            return date;
+        });
+
         const salesData = forecastData.map(data => data.TimeGPT);
-        
+
+        // Log the sales data to ensure it's correct
+        console.log("Sales Data: ", salesData);
+
         // Initialize Chart.js
         const ctx = document.getElementById('salesChart').getContext('2d');
         const salesChart = new Chart(ctx, {
@@ -66,7 +81,8 @@
         forecastData.forEach(data => {
             const row = document.createElement('tr');
             const dateCell = document.createElement('td');
-            dateCell.textContent = data.Date;
+            const formattedDate = new Date(data.Date).toISOString().split('T')[0]; // Ensure correct date format
+            dateCell.textContent = formattedDate;
             const salesCell = document.createElement('td');
             salesCell.textContent = data.TimeGPT;
             row.appendChild(dateCell);
