@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Forecast</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Gross Sales Forecast</h1>
+    
+    <!-- Chart Container -->
+    <canvas id="salesChart"></canvas>
+    
+    <!-- Table Container -->
+    <h2>Forecasted Data</h2>
+    <table border="1" id="forecastTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Predicted Gross Sales</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        // Get the forecast data from Flask
+        const forecastData = {{ forecast_data | tojson }};
+        
+        // Prepare data for the chart
+        const labels = forecastData.map(data => data.Date);
+        const salesData = forecastData.map(data => data.TimeGPT);
+        
+        // Initialize Chart.js
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Predicted Gross Sales',
+                    data: salesData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false,
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Populate the forecast table
+        const tableBody = document.querySelector('#forecastTable tbody');
+        forecastData.forEach(data => {
+            const row = document.createElement('tr');
+            const dateCell = document.createElement('td');
+            dateCell.textContent = data.Date;
+            const salesCell = document.createElement('td');
+            salesCell.textContent = data.TimeGPT;
+            row.appendChild(dateCell);
+            row.appendChild(salesCell);
+            tableBody.appendChild(row);
+        });
+    </script>
+</body>
+</html>
